@@ -1,0 +1,37 @@
+name: Test pip compile
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: ansible/aap-docs
+          ref: main
+
+      - name: Checkout Ansible-lint
+        uses: actions/checkout@v3
+        with:
+          repository: oraNod/ansible-documentation
+          ref: issue-30/pin-test-requirements
+          path: ansible-documentation
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'
+
+      - name: Output Python info
+        run: python --version --version && which python
+
+      - name: Build Ansible-lint docs from source
+        run: |
+          cd ansible-documentation/tests
+          pip-compile --allow-unsafe --output-file=requirements.txt --resolver=backtracking --strip-extras requirements.in
+          less requirements.txt
